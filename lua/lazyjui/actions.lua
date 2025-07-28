@@ -9,6 +9,7 @@ function M.close()
 	Window.close_floating_window()
 end
 
+---@diagnostic disable-next-line: unused-local
 local function on_exit(job_id, code, event)
 	local Window = require("lazyjui.window")
 
@@ -34,8 +35,7 @@ end
 function M.open(winblend)
 	local cmd = { "jjui" }
 
-	-- cmd = cmd or { "jjui" }
-	winblend = winblend or require("lazyjui.config").winblend or 0
+	winblend = winblend or require("lazyjui.config").winblend
 	local border_chars = require("lazyjui.config").border_chars
 		or { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
 
@@ -46,6 +46,7 @@ function M.open(winblend)
 		vim.notify("jjui executable not found. Please install jjui and ensure it's in your PATH.", vim.log.levels.ERROR)
 	end
 
+	---@diagnostic disable-next-line: unused-local
 	local win, buf = Window.open_floating_window(winblend, border_chars)
 	M.execute(cmd)
 end
