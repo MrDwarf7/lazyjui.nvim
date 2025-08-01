@@ -1,5 +1,4 @@
 ---@class lazyjui.Health
----@field check fun(): nil
 local M = {}
 
 function M.check()
@@ -28,5 +27,4 @@ function M.check()
 	end
 end
 
----@return lazyjui.Health
 return M

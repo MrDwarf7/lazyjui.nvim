@@ -1,10 +1,8 @@
 ---@class lazyjui.Actions
----@field Window lazyjui.Window
-----@field close fun(opts?: lazyjui): nil
----@field close fun(): nil
----@field execute fun(cmd: string|table): nil
----@field open fun(opts?: lazyjui): nil
 local M = {}
+
+---@package
+M.__index = M
 
 M.Window = nil
 
@@ -12,12 +10,12 @@ function M.close()
 	M.Window.close_floating_window()
 end
 
-----@param job_id number
+---@param _ number The `job_id` of the job that exited
 ---@param code number
-----@param event string
+---@param __ string The `event` that triggered the exit
 ---@return nil
 ---@diagnostic disable-next-line: unused-local
-local function on_exit(_, code, _)
+local function on_exit(_, code, __)
 	if code ~= 0 then
 		return
 	end
@@ -47,5 +45,4 @@ function M.open(opts)
 	M.execute(opts.Config.cmd)
 end
 
----@return lazyjui.Actions
 return M

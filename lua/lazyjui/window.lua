@@ -1,17 +1,4 @@
 ---@class lazyjui.Window
----@field buffer? int
----@field height uint
----@field loaded boolean
----@field previous_window? int
----@field width uint
----@field window? int
----@field autocmd_group? int
----@field autocmd_group_has_init boolean?
-----@field open_floating_window fun(winblend?: integer, border_chars?: string[]): int, int
----@field open_floating_window fun(config: lazyjui.Config): int, int
----@field close_floating_window fun(): nil
----@field autocmd_group_init fun(config: lazyjui.Config): nil
----@field autocmd_group_deinit fun(): nil
 local M = {
 	buffer = nil,
 	loaded = false,
@@ -21,8 +8,11 @@ local M = {
 	autocmd_group_has_init = nil,
 }
 
----@param winblend integer
+--- Small local function for bulk setting options via
+--- the usge of vim.wo, vim.bo and vim.api.nvim_set_hl.
+---@param winblend Int
 local function buffer_opts(winblend)
+	winblend = winblend or 0
 	vim.bo.bufhidden = "hide"
 	vim.wo.cursorcolumn = false
 	vim.wo.signcolumn = "no"
@@ -30,7 +20,7 @@ local function buffer_opts(winblend)
 	vim.api.nvim_set_hl(0, "LazyJuiFloat", { link = "Normal", default = true })
 	vim.wo.winhl = "FloatBorder:LazyJuiBorder,NormalFloat:LazyJuiFloat"
 	vim.bo.filetype = "lazyjui"
-	vim.wo.winblend = winblend or 0 -- 0 = entirely solid
+	vim.wo.winblend = winblend
 end
 
 ---@param config lazyjui.Config
@@ -133,6 +123,7 @@ function M.open_floating_window(config)
 		return plenary_win, plenary_buf
 	end
 
+	---@type vim.api.keyset.win_config
 	local new_window_opts = {
 		style = "minimal", -- disables line numbers, statusline, etc.
 		relative = "editor", -- position relative to the entire editor
@@ -165,5 +156,9 @@ function M.close_floating_window()
 	vim.cmd("silent! :checktime")
 end
 
----@return lazyjui.Window
+-- TEST: Have a feeling this _may_ cause some issues but not sure rn
+
+---@package
+M.__index = M
+
 return M

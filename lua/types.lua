@@ -1,0 +1,325 @@
+---@meta
+---
+---@module 'lazyjui'
+---
+---
+--@alias int number
+----@alias uint number -- represents an unsigned number type
+
+----------------------------------------------------------------------------------------------------
+-- Aliases
+
+---@alias Key string: number any
+---@alias Value string: number any
+
+---@see lazyjui.Config.mod regarding alias overwriting
+
+----------------------------------------------------------------------------------------------------
+-- Arbirary types
+
+--- A number with only integer values.
+--- May be either positive or negative.
+---@class Int: number
+
+--- A number with only integer values.
+--- This class states the number must be unsigned
+--- and non-negative. (No `-` sign.).
+---@class Uint: Int|number
+
+--- A number with a decimal point, arbirarily precision cos Lua is Lua.
+---@class Float: number
+
+----------------------------------------------------------------------------------------------------
+-- Classes and their fields
+
+---@class lazyjui
+--- Calls open on the terminal creation command,
+--- spawning a new window.
+--- This uses the `Actions` module to handle the opening logic.
+---@field open fun(): nil
+--- Closes the current window or terminal.
+--- This uses the `Actions` module to handle the closing logic.
+---
+--- **Note**: This is called automatically when you exit the terminal.
+---@field close fun(): nil
+--- The primary setup function for LazyJui.
+--- It initializes the configuration and sets up the necessary components.
+--- This is called automatically if you're using `LazyVim` as your plugin manager.
+--- Just pass the `opts = {}` or `opts = true` if you're happy with the defaults.
+--- Alternatively, you can pass in your own overrides into the opts table.
+---@field setup fun(opts?: lazyjui.Config): nil
+--- The sub-module for configuration management.
+---@field Config lazyjui.Config
+--- The sub-module for window management.
+---@field Window lazyjui.Window
+--- The sub-module for utility functions.
+---@field Utils lazyjui.Utils
+-- local M = {}
+-- return M
+
+----------------------------------------------------------------------------------------------------
+
+---@class lazyjui.Actions
+--- The `lazyjui.Window` object used for managing floating windows.
+---@see lazyjui.Window for more details.
+---@field Window lazyjui.Window
+--- The `lazyjui.Actions` layer for calling the internal
+--- `lazyjui.Window` methods.
+---@field close fun(): nil
+--- This function is responsible for executing a command in a terminal.
+--- and handles cleanup once the bufrfer/window has been closed or exited.
+---
+--- If you happen to experience lags/memory leaks, this will likely
+--- be the first suspect.
+---
+--- That being said -
+--- If you find any issues, **please** report them on the GitHub repository,
+--- and **remember** -
+--- You're not being 'nagging'; you're helping software (and developers) improve!
+---@field execute fun(cmd: string|table): nil
+---
+--- The primary funciton you'll be calling from your keymap via
+---
+--- `map("n", "<Leader>jj", function()
+---   require("lazyjui").open()
+---  end, { desc = "Open LazyJui" })`
+---
+--- or via the keys array in your plugin spec setup.
+---
+--- This opens the terminal window, handles displaying it,
+--- and clean-up after you've exited the buffer
+--- (Either by jumping buffers, or closing it directly).
+---@field open fun(opts?: lazyjui): nil
+-- local M = {}
+-- return M
+
+----------------------------------------------------------------------------------------------------
+
+--@class lazyjui.Config.mod: lazyjui.Config
+-- local M = {}
+-- return M
+
+----------------------------------------------------------------------------------------------------
+
+---@class lazyjui.Config
+--- Provide an array of characters to use for the border.
+---
+--- Ensure the order in which you're providing them is correct,
+--- there's no sorting being done under the hood.
+---
+--- **Default**
+---
+--- `{ "╭", "─", "╮", "│", "╯", "─", "╰", "│" }`
+---
+---@field border_chars? string[]
+--- The command that should be called by the plugin.
+--- This has many strict checks on it when coming in from
+--- a user defined config.
+---
+--- **Default**
+---
+--- `cmd = { "jjui" }`
+---
+--- It must be provided as a table - This also allows you
+--- to pass through standard `jj` flags along with it.
+---
+--- **Example** (This is what I use, personally):
+---
+--- `cmd = { "jjui", "-r", "all()" }`
+---
+---@field cmd? string|string[]
+---
+--- The default height of the floating window.
+---
+--- **Default**
+---
+--- height = 0.8
+---
+---@field height Int
+---
+---
+--- [Experiemntal]
+---
+--- Whether to hide the floating window only.
+--- Normally the window is destroyed on changing buffers,
+--- this option allows you to keep the window -
+--- meaning it would load ever-so-slightly faster.
+---
+--- **Default**
+---
+--- hide_only = false
+---
+---@field hide_only boolean
+---
+--- Whether to use the default keymaps provided by the plugin.
+--- If this is set to `false`, you will need to
+--- define your own keymaps.
+--- or set it to true via
+--- `opts = { use_default_keymaps = true }`.
+---
+---@field use_default_keymaps? boolean
+---
+--- The default width of the floating window.
+---
+--- **Default**
+--- width = 0.9
+---
+---@field width Float
+---
+--- The winblend value for the floating window.
+--- This defines how opaque (solid vs. see-through)
+--- the floating window is.
+---
+--- If it's set to `0`, the window will be entirely solid.
+--- If you decide (for some reason) to set it to `100`,
+--- It'll be incredibly difficult to see.
+---
+--- **Default**
+--- winblend = 0
+---
+---@field winblend Int
+---
+---
+--- Metatable for the configuration.
+---@private
+---@field __index lazyjui.Config
+---
+---
+--- Initializer flag
+---@private
+---@field __has_init boolean
+---
+--- The primary setup function for the configuration.
+--- Handles merging the default configuration
+--- with the user provided opts (options),
+--- If the user has provided a key or value,
+--- theirs will overwrite the defaults.
+---
+---
+---@field setup fun(opts?: lazyjui.Config): nil
+---
+-- local M = {}
+-- return M
+
+----------------------------------------------------------------------------------------------------
+
+---@diagnostic disable-next-line: duplicate-doc-alias
+---@alias lazyjui.Config.mod lazyjui.Config
+-- local M = {}
+-- return M
+
+----------------------------------------------------------------------------------------------------
+
+--- This module provides the ability to call
+--- `check` on the health of the plugin.
+---
+---@class lazyjui.Health
+---
+--- The required function/field
+--- for the `checkhealth` command to call.
+---
+---@field check fun(): nil
+-- local M = {}
+-- return M
+
+----------------------------------------------------------------------------------------------------
+
+--- The general utility functions for the plugin.
+--- These are used internally, but feel free to use them
+--- if they suit your needs.
+---@class lazyjui.Utils
+---
+--- Checks type and validity of the command.
+---
+--- The provided param `cmd`, must be either a string or table.
+--- If you're wanting to optimize loading times,
+--- you're best off passing a table.
+---
+---@field is_available fun(cmd: string|table): boolean
+---
+---
+--- A type-checking and conversion function.
+--- Handles string->table conversion and
+--- fallback defaults of { "jjui" } if things go wrong.
+---
+---@field string_to_table fun(str: string): string[]
+-- local M = {}
+-- return M
+
+----------------------------------------------------------------------------------------------------
+
+--- The window management module.
+--- very much internal functionality,
+--- you're welcome to see how it works.
+---
+---@class lazyjui.Window
+---
+---
+--- The buffer ID of the floating window.
+---
+---@field buffer? Int
+---
+--- The height of the floating window.
+---
+---@field height Uint
+---
+--- If the floating window itself is currently
+--- is loaded.
+---
+---@field loaded boolean
+---
+--- The previous window's winid,
+--- used for restoring the previous window.
+---
+---@field previous_window? Int
+---
+--- The width of the floating window.
+--- @see lazyjui.Config.width for what we scale this off of.
+---
+---@field width Uint
+---
+--- Effectively acts like swap-space/scratch space
+--- while you're changing buffers to and from the floating window.
+---
+---@field window? Int
+---
+--- We initialize an autocmd group at the
+--- beginning of the plugin's lifecycle.
+--- This assists in ensuring things like:
+---
+--- - resizing the window
+--- - leaving the window,
+--- - closing the buffer
+---
+--- are all handled correctly.
+---
+---@field autocmd_group? Int
+---
+--- Initialization flag for the autocmd group.
+--- Prevents creating stacking autocmd groups
+--- which is incredibly bad for performance.
+---
+---@field autocmd_group_has_init boolean?
+---
+--- The primary functionality of the `lazyjui.Window` module.
+--- This is what's called by the `lazyjui.Actions.open` function.
+---
+---@field open_floating_window fun(config: lazyjui.Config): Int, Int
+---
+--- The close and cleanup of the floating window.
+--- This is what's called by the `lazyjui.Actions.close` function.
+---
+---@field close_floating_window fun(): nil
+---
+--- Function for handling _all_ related autocmd setup.
+---
+---@field autocmd_group_init fun(config: lazyjui.Config): nil
+---
+---
+--- Autocmd cleanup and deinitialization function.
+--- Ensures that the autocmd group is removed.
+---
+---@field autocmd_group_deinit fun(): nil
+-- local M = {}
+-- return M
+----------------------------------------------------------------------------------------------------

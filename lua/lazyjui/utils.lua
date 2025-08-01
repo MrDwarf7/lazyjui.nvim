@@ -1,13 +1,9 @@
----@alias Key string: number any
----@alias Value string: number any
-
 ---@class lazyjui.Utils
----@field is_available fun(cmd: string|table): boolean
----@field string_to_table fun(str: string): string[]
 local M = {}
 
----@param cmd string|string[]
----@return boolean
+---@package
+M.__index = M
+
 function M.is_available(cmd)
 	-- Cast/as to remove warnings as we're mutating type inside the func
 	-- we don't return the `cmd` anyway
@@ -39,8 +35,6 @@ function M.is_available(cmd)
 	return vim.fn.executable(cmd) == 1
 end
 
----@param str string
----@return string[]
 function M.string_to_table(str)
 	if type(str) ~= "string" or str == "" then
 		local t = {}
@@ -60,5 +54,4 @@ function M.string_to_table(str)
 	return command
 end
 
----@return lazyjui.Utils
 return M
