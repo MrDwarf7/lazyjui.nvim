@@ -6,16 +6,22 @@
 ---@field width uint
 ---@field window? int
 ---@field autocmd_group? int
----@field open_floating_window fun(winblend?: integer, border_chars?: string[]): int, int
+---@field autocmd_group_has_init boolean?
+----@field open_floating_window fun(winblend?: integer, border_chars?: string[]): int, int
+---@field open_floating_window fun(config: lazyjui.Config): int, int
 ---@field close_floating_window fun(): nil
+---@field autocmd_group_init fun(config: lazyjui.Config): nil
+---@field autocmd_group_deinit fun(): nil
 local M = {
 	buffer = nil,
 	loaded = false,
 	previous_window = nil,
 	window = nil,
 	autocmd_group = nil,
+	autocmd_group_has_init = nil,
 }
 
+---@param winblend integer
 local function buffer_opts(winblend)
 	vim.bo.bufhidden = "hide"
 	vim.wo.cursorcolumn = false
@@ -27,57 +33,28 @@ local function buffer_opts(winblend)
 	vim.wo.winblend = winblend or 0 -- 0 = entirely solid
 end
 
-local function window_pos()
-	local Config = require("lazyjui.config")
-	local height_c = Config.height
-	local width_c = Config.width
-	local border_chars = Config.border_chars
+---@param config lazyjui.Config
+local function window_pos(config)
 	local status, plenary = pcall(require, "plenary.window.float")
 
 	if status then
 		local ret = plenary.percentage_range_window(0.9, 0.8, {
-			border = border_chars,
+			border = config.border_chars,
 		})
 
 		return nil, nil, nil, nil, ret.win_id, ret.bufnr
 	end
 
-	local height = math.ceil(vim.o.lines * height_c) - 1
-	local width = math.ceil(vim.o.columns * width_c)
+	local height = math.ceil(vim.o.lines * config.height) - 1
+	local width = math.ceil(vim.o.columns * config.width)
 	local row = math.ceil((vim.o.lines - height) / 2)
 	local col = math.ceil((vim.o.columns - width) / 2)
 
 	return width, height, row, col, nil, nil
 end
 
-function M.open_floating_window(winblend, border_chars)
-	M.previous_window = vim.api.nvim_get_current_win()
-
-	-- Get plenary's float window module which handles window creation
-	local width, height, row, col, plenary_win, plenary_buf = window_pos()
-	if plenary_win and plenary_buf then
-		-- vim.wo.winblend = winblend
-		return plenary_win, plenary_buf
-	end
-
-	local opts = {
-		style = "minimal", -- disables line numbers, statusline, etc.
-		relative = "editor", -- position relative to the entire editor
-		row = row,
-		col = col,
-		width = width,
-		height = height,
-		border = border_chars,
-	}
-
-	if M.buffer == nil or vim.fn.bufwinnr(M.buffer) == -1 then
-		M.buffer = vim.api.nvim_create_buf(false, true)
-	else
-		M.loaded = true
-	end
-
-	M.window = vim.api.nvim_open_win(M.buffer, true, opts)
-	buffer_opts(winblend)
+function M.autocmd_group_init(config)
+	M.autocmd_group_has_init = true
 
 	-- Create autocmd group for cleanup
 	M.autocmd_group = vim.api.nvim_create_augroup("LazyJuiWindow", { clear = true })
@@ -104,7 +81,7 @@ function M.open_floating_window(winblend, border_chars)
 				if not vim.api.nvim_win_is_valid(M.window) then
 					return
 				end
-				local new_width, new_height, new_row, new_col, _, _ = window_pos()
+				local new_width, new_height, new_row, new_col, _, _ = window_pos(config)
 				vim.api.nvim_win_set_config(M.window, {
 					width = new_width,
 					height = new_height,
@@ -114,14 +91,10 @@ function M.open_floating_window(winblend, border_chars)
 			end, 20)
 		end,
 	})
-
-	return M.window, M.buffer
 end
 
-function M.close_floating_window()
-	M.loaded = false
-
-	vim.cmd("silent! :checktime")
+function M.autocmd_group_deinit()
+	M.autocmd_group_has_init = false
 
 	-- Clean up autocmd group
 	if M.autocmd_group then
@@ -145,4 +118,52 @@ function M.close_floating_window()
 	end
 end
 
+function M.hide_only()
+	M.previous_window = vim.api.nvim_get_current_win()
+	assert(nil, "Not implemented yet")
+end
+
+function M.open_floating_window(config)
+	M.previous_window = vim.api.nvim_get_current_win()
+
+	-- Get plenary's float window module which handles window creation
+	local width, height, row, col, plenary_win, plenary_buf = window_pos(config)
+	if plenary_win and plenary_buf then
+		vim.wo.winblend = config.winblend
+		return plenary_win, plenary_buf
+	end
+
+	local new_window_opts = {
+		style = "minimal", -- disables line numbers, statusline, etc.
+		relative = "editor", -- position relative to the entire editor
+		row = row,
+		col = col,
+		width = width,
+		height = height,
+		border = config.border_chars,
+	}
+
+	if M.buffer == nil or vim.fn.bufwinnr(M.buffer) == -1 then
+		M.buffer = vim.api.nvim_create_buf(false, true)
+	else
+		M.loaded = true
+	end
+
+	M.window = vim.api.nvim_open_win(M.buffer, true, new_window_opts)
+	buffer_opts(config.winblend)
+
+	M.autocmd_group_init(config)
+
+	return M.window, M.buffer
+end
+
+function M.close_floating_window()
+	M.loaded = false
+
+	M.autocmd_group_deinit()
+
+	vim.cmd("silent! :checktime")
+end
+
+---@return lazyjui.Window
 return M

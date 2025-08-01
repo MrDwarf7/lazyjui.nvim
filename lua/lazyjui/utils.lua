@@ -6,10 +6,12 @@
 ---@field string_to_table fun(str: string): string[]
 local M = {}
 
----@param cmd table
+---@param cmd string|string[]
 ---@return boolean
 function M.is_available(cmd)
-	-- We take in a table -> check it -> table to string, run
+	-- Cast/as to remove warnings as we're mutating type inside the func
+	-- we don't return the `cmd` anyway
+	-- local cmd_in = cmd --[[@as string|table]]
 
 	if type(cmd) == "string" then
 		cmd = M.string_to_table(cmd)
@@ -23,11 +25,18 @@ function M.is_available(cmd)
 		return false
 	end
 
-	local as_string = table.concat(cmd, " ")
-	if not as_string or as_string == "" then
+	cmd = table.concat(cmd, " ")
+	if not cmd or cmd == "" then
 		return false
 	end
-	return vim.fn.executable(as_string) == 1
+
+	local executable = string.match(cmd, "^(%S+)")
+
+	if executable then
+		return vim.fn.executable(executable) == 1
+	end
+
+	return vim.fn.executable(cmd) == 1
 end
 
 ---@param str string
@@ -51,4 +60,5 @@ function M.string_to_table(str)
 	return command
 end
 
+---@return lazyjui.Utils
 return M

@@ -28,4 +28,5 @@ function M.check()
 	end
 end
 
+---@return lazyjui.Health
 return M

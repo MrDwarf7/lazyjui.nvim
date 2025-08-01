@@ -1,26 +1,30 @@
 ---@class lazyjui.Actions
+---@field Window lazyjui.Window
+----@field close fun(opts?: lazyjui): nil
 ---@field close fun(): nil
 ---@field execute fun(cmd: string|table): nil
----@field open fun(winblend?: int): nil
+---@field open fun(opts?: lazyjui): nil
 local M = {}
 
+M.Window = nil
+
 function M.close()
-	local Window = require("lazyjui.window")
-	Window.close_floating_window()
+	M.Window.close_floating_window()
 end
 
+----@param job_id number
+---@param code number
+----@param event string
+---@return nil
 ---@diagnostic disable-next-line: unused-local
-local function on_exit(job_id, code, event)
-	local Window = require("lazyjui.window")
-
+local function on_exit(_, code, _)
 	if code ~= 0 then
 		return
 	end
 
-	Window.close_floating_window()
+	M.Window.close_floating_window()
 end
 
----@param cmd string|table
 function M.execute(cmd)
 	vim.schedule(function()
 		vim.fn.jobstart(cmd, {
@@ -31,24 +35,17 @@ function M.execute(cmd)
 	vim.cmd("startinsert")
 end
 
----@param winblend? int
-function M.open(winblend)
-	local cmd = { "jjui" }
-
-	winblend = winblend or require("lazyjui.config").winblend
-	local border_chars = require("lazyjui.config").border_chars
-		or { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
-
-	local Window = require("lazyjui.window")
-	local Utils = require("lazyjui.utils")
-
-	if Utils.is_available(cmd) ~= true then
+function M.open(opts)
+	if not opts.Utils.is_available(opts.Config.cmd) then
 		vim.notify("jjui executable not found. Please install jjui and ensure it's in your PATH.", vim.log.levels.ERROR)
 	end
 
+	-- We can do some form of caching later using the return values I reckon
+
 	---@diagnostic disable-next-line: unused-local
-	local win, buf = Window.open_floating_window(winblend, border_chars)
-	M.execute(cmd)
+	local win, buf = M.Window.open_floating_window(opts.Config)
+	M.execute(opts.Config.cmd)
 end
 
+---@return lazyjui.Actions
 return M
