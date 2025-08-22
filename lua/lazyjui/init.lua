@@ -1,5 +1,7 @@
 ---@class lazyjui
-local M = {}
+local M = {
+	opts = {},
+}
 
 M.Window = nil
 M.Config = nil
@@ -13,8 +15,10 @@ local Actions = require("lazyjui.actions")
 M.__has_init = false
 
 function M.setup(opts)
+	opts = opts or {}
+	M.opts = vim.tbl_deep_extend("force", M.opts, opts)
 	-- Call setup to init
-	Config.setup(opts)
+	Config.setup(M.opts)
 
 	-- Assignments for each sub-section/sub-module
 
@@ -41,5 +45,5 @@ function M.close()
 	M.Actions.close()
 end
 
----@return lazyjui
+---@type lazyjui
 return M

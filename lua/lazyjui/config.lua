@@ -1,8 +1,7 @@
 ---@class lazyjui.Config
 local M = {}
 
-----@class lazyjui.Config.mod
----@class lazyjui.Config.mod : lazyjui.Config
+---@type lazyjui.Default
 local default_config = {
 	border_chars = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
 	cmd = { "jjui" },
@@ -22,6 +21,7 @@ M.__has_init = false
 function M.setup(opts)
 	opts = opts or {}
 
+	---@type lazyjui.Default
 	local new_conf = vim.tbl_deep_extend("force", default_config, opts)
 
 	for k, v in pairs(new_conf) do
