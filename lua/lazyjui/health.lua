@@ -1,5 +1,8 @@
 ---@class lazyjui.Health
-local M = {}
+local M = {
+	__name = "Health",
+	__debug = false,
+}
 
 function M.check()
 	local health = vim.health or require("health")
@@ -27,4 +30,10 @@ function M.check()
 	end
 end
 
-return M
+---@type lazyjui.Health
+return setmetatable(M, {
+	---@package
+	__index = M,
+	__name = M.__name,
+	__debug = M.__debug,
+})

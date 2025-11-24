@@ -1,13 +1,16 @@
 ---@class lazyjui.Actions
-local M = {}
+local M = {
+	__name = "Actions",
+	__debug = false,
+	Window = nil,
+}
 
----@package
 M.__index = M
 
-M.Window = nil
+-- M.Window = nil
 
-function M.close()
-	M.Window.close_floating_window()
+function M:close()
+	self.Window:close_floating_window()
 end
 
 ---@param _ number The `job_id` of the job that exited
@@ -20,10 +23,10 @@ local function on_exit(_, code, __)
 		return
 	end
 
-	M.Window.close_floating_window()
+	M.Window:close_floating_window()
 end
 
-function M.execute(cmd)
+function M:execute(cmd)
 	vim.schedule(function()
 		vim.fn.jobstart(cmd, {
 			term = true,
@@ -33,16 +36,32 @@ function M.execute(cmd)
 	vim.cmd("startinsert")
 end
 
-function M.open(opts)
-	if not opts.Utils.is_available(opts.Config.cmd) then
+function M:open(utils, config)
+	if not utils.is_available(config.cmd) then
 		vim.notify("jjui executable not found. Please install jjui and ensure it's in your PATH.", vim.log.levels.ERROR)
 	end
 
 	-- We can do some form of caching later using the return values I reckon
 
 	---@diagnostic disable-next-line: unused-local
-	local win, buf = M.Window.open_floating_window(opts.Config)
-	M.execute(opts.Config.cmd)
+	local win, buf = self.Window:open_floating_window(config)
+	self:execute(config.cmd)
 end
 
-return M
+function M.setup(window)
+	-- Initialize submodules
+	if not M.Window then
+		M.Window = window or require("lazyjui.window")
+		return M
+	end
+	return M
+end
+
+---@type lazyjui.Actions
+return setmetatable(M, {
+	__call = function(_, ...)
+		return M.setup(...)
+	end,
+	__name = M.__name,
+	__debug = M.__debug,
+})
