@@ -1,5 +1,8 @@
 ---@class lazyjui.Config
-local M = {}
+local M = {
+	__name = "Config",
+	__debug = false,
+}
 
 ---@type lazyjui.Default
 local default_config = {
@@ -19,16 +22,24 @@ M.__index = M
 M.__has_init = false
 
 function M.setup(opts)
-	opts = opts or {}
-
 	---@type lazyjui.Default
-	local new_conf = vim.tbl_deep_extend("force", default_config, opts)
+	local new_conf = vim.tbl_deep_extend("force", default_config, opts or {})
 
 	for k, v in pairs(new_conf) do
 		M[k] = v
 	end
-	M.__has_init = true
+
+	return setmetatable(M, {
+		__index = M,
+		__has_init = true,
+	})
 end
 
-----@return lazyjui.Config
-return M
+---@type lazyjui.Config
+return setmetatable(M, {
+	__call = function(_, ...)
+		return M.setup(...)
+	end,
+	__index = M.__index,
+	__has_init = M.__has_init,
+})

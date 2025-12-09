@@ -1,8 +1,8 @@
 ---@class lazyjui.Utils
-local M = {}
-
----@package
-M.__index = M
+local M = {
+	__name = "Utils",
+	__debug = false,
+}
 
 function M.is_available(cmd)
 	-- Cast/as to remove warnings as we're mutating type inside the func
@@ -54,4 +54,74 @@ function M.string_to_table(str)
 	return command
 end
 
-return M
+--- Function to notify messages, aware of fast events
+---@param msg MsgData|string The message to notify
+---@param level number The log level (e.g., vim.log.levels.INFO)
+---@param opts table? Additional options for the notification
+local function fast_event_aware_notify(msg, level, opts) --[[@cast msg string]]
+	-- force cast to shut linter up
+	if vim.in_fast_event() then
+		vim.schedule(function()
+			vim.notify(msg, level, opts)
+		end)
+	else
+		vim.notify(msg, level, opts)
+	end
+end
+
+---@private
+function M.info(msg)
+	-- fast_event_aware_notify(msg, vim.log.levels.INFO, { title = "Info" })
+	fast_event_aware_notify(msg, vim.log.levels.INFO, {})
+end
+
+---@private
+function M.warn(msg)
+	-- fast_event_aware_notify(msg, vim.log.levels.WARN, { title = "Warning" })
+	fast_event_aware_notify(msg, vim.log.levels.WARN, {})
+end
+
+---@private
+function M.err(msg)
+	-- fast_event_aware_notify(msg, vim.log.levels.ERROR, { title = "Error" })
+	fast_event_aware_notify(msg, vim.log.levels.ERROR, {})
+end
+
+function M.notify(msg, level)
+	assert(type(msg) ~= "nil", "Message cannot be nil")
+
+	if type(msg) ~= "string" then
+		msg = vim.inspect(msg)
+	end
+
+	if type(level) == "nil" then
+		level = vim.log.levels.INFO
+	elseif type(level) == "number" then
+		level = vim.log.levels[level] or vim.log.levels.INFO
+	elseif type(level) == "string" then
+		level = string.lower(level)
+	else
+		level = vim.log.levels.INFO
+	end
+
+	-- level = string.lower(level) or vim.log.levels.INFO
+	M[level](msg)
+end
+
+function M.deep_print(msg, objects)
+	if not type(objects) == "nil" and objects then
+		vim.print(msg .. vim.inspect(objects))
+	end
+	vim.print(vim.inspect(msg))
+end
+
+-- return M
+---@type lazyjui.Utils
+return setmetatable(M, {
+	__call = function(_, _)
+		return M
+	end,
+	---@package
+	__index = M,
+	__debug = M.__debug,
+})

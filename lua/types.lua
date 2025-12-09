@@ -30,15 +30,31 @@
 ---
 ---@class Float: number
 
+--- Message level type for logging/notification levels.
+---
+---@alias lazyjui.MsgLevel string|integer|vim.log.levels.TRACE|vim.log.levels.DEBUG|vim.log.levels.INFO|vim.log.levels.WARN|vim.log.levels.ERROR|nil
+
+--- A message data type that can be either
+--- unknown or a vim.SystemCompleted object.
+---
+--- * Note: `unknown` here is _not_ 'any'
+---
+---@class MsgData: unknown|vim.SystemCompleted
+
 ------------------------------------------------------------
 -- Classes and their fields
+
+--- Base attributes for each module/sub-module.
+---@class lazyjui.Module
+---@field __name string The name of the module.
+---@field __debug boolean Whether debug mode is enabled for the module.
 
 ---
 --- This represents the options that can be passed
 --- in by the user to the `lazyjui.setup` function,
 --- or (if using lazyvim) the `opts` table in the plugin spec.
 ---
----@class lazyjui.Opts
+---@class lazyjui.Opts: lazyjui.Module
 ---
 --- Provide an array of characters to use for the border.
 ---
@@ -123,11 +139,11 @@
 -- local M = {}
 -- return M
 
----@class lazyjui
+---@class lazyjui: lazyjui.Module
 ---
 --- Field to take the initial options.
 ---
----@field opts lazyjui.Opts
+---@field opts? lazyjui.Opts|table<nil, nil>|nil
 ---
 --- Calls open on the terminal creation command,
 --- spawning a new window.
@@ -146,7 +162,7 @@
 --- The primary setup function for LazyJui.
 --- It initializes the configuration and sets up the necessary components.
 ---
---- This is called automatically if you're using `LazyVim` as your plugin manager.
+--- This is called automatically if you're using `lazy.nvim` as your plugin manager.
 ---
 --- Just pass the `opts = {}` or `opts = true` if you're happy with the defaults.
 --- Alternatively, you can pass in your own overrides into the opts table.
@@ -181,15 +197,22 @@
 ---
 --- The sub-module for configuration management.
 ---
----@field Config lazyjui.Config
+---@field Config? lazyjui.Config|nil
 ---
 --- The sub-module for window management.
 ---
----@field Window lazyjui.Window
+---@field Window? lazyjui.Window|nil
 ---
 --- The sub-module for utility functions.
 ---
----@field Utils lazyjui.Utils
+---@field Utils? lazyjui.Utils|nil
+---
+---
+--- The sub-module for action functions.
+---@field Actions? lazyjui.Actions|nil
+---
+--- The sub-module for health checks.
+---@field Health? lazyjui.Health|nil
 ---
 -- local M = {}
 -- return M
@@ -203,19 +226,23 @@
 --- It's mostly an abstract layer over the `lazyjui.Window` module,
 --- to prevent potential breaking changes leaaking into the public API.
 ---
----@class lazyjui.Actions
+---@class lazyjui.Actions: lazyjui.Module
 --- The `lazyjui.Window` object used for managing floating windows.
 ---@see lazyjui.Window for more details.
 ---
 --- This is the primary object that handles
 --- all window management and operations.
 ---
----@field Window lazyjui.Window
+---@field Window? lazyjui.Window
+---
+--- The command that should be called by the plugin.
+--- Cached after first use via `lazyjui.Utils.is_available`.
+---@field cmd? string[]
 ---
 --- The `lazyjui.Actions` layer for calling the internal
 --- `lazyjui.Window` methods.
 ---
----@field close fun(): nil
+---@field close fun(self: lazyjui.Actions): nil
 ---
 --- This function is responsible for executing a command in a terminal.
 --- and handles cleanup once the bufrfer/window has been closed or exited.
@@ -228,7 +255,7 @@
 --- and **remember** -
 --- You're not being 'nagging'; you're helping software (and developers) improve!
 ---
----@field execute fun(cmd: string|table): nil
+---@field execute fun(self: lazyjui.Actions): nil
 ---
 --- The primary funciton you'll be calling from your keymap via
 ---
@@ -242,7 +269,15 @@
 --- and clean-up after you've exited the buffer
 --- (Either by jumping buffers, or closing it directly).
 ---
----@field open fun(opts?: lazyjui): nil
+---@field open fun(self: lazyjui.Actions, utils: lazyjui.Utils, config: lazyjui.Config ): nil
+-- ---@field open fun(plugin?: lazyjui): nil
+---
+--- This sets up the `lazyjui.Actions` module.
+--- takes an optional `lazyjui.Window` parameter.
+---
+---
+--- * Note: The parameter is only for cache optimization.
+---@field setup fun(window?: lazyjui.Window): lazyjui.Actions
 ---
 -- local M = {}
 -- return M
@@ -255,7 +290,7 @@
 --- This is what the plugin uses internally
 --- during runtime.
 ---
----@class lazyjui.Config
+---@class lazyjui.Config: lazyjui.Module
 ---
 --- Provide an array of characters to use for the border.
 ---
@@ -283,7 +318,7 @@
 ---
 --- `cmd = { "jjui", "-r", "all()" }`
 ---
----@field cmd? string|string[]
+---@field cmd? string[]
 ---
 --- The default height of the floating window.
 ---
@@ -353,10 +388,26 @@
 --- theirs will overwrite the defaults.
 ---
 ---
----@field setup fun(opts?: lazyjui.Opts): nil
+---@field setup fun(opts?: lazyjui.Opts): lazyjui.Config
 ---
 -- local M = {}
 -- return M
+------------------------------------------------------------
+
+---@class PlaneryPercentageRangeWindow
+---@field bufnr Int
+---@field win_id Int
+---
+---@field border_bufnr Int
+---@field border_win_id Int
+
+---@class lazyjui.Config.WindowPos: vim.api.keyset.win_config
+---@field width? number|nil Percentage of screen width (0.0 - 1.0)
+---@field height? number|nil Percentage of screen height (0.0 - 1.0)
+---@field row? number|nil Row position of the window
+---@field col? number|nil Column position of the window
+---@field win_id? number|nil Plenary window ID
+---@field bufnr? number|nil Plenary buffer number
 
 ------------------------------------------------------------
 
@@ -364,7 +415,7 @@
 --- This module provides the ability to call
 --- `check` on the health of the plugin.
 ---
----@class lazyjui.Health
+---@class lazyjui.Health: lazyjui.Module
 ---
 --- The required function/field
 --- for the `checkhealth` command to call.
@@ -380,7 +431,7 @@
 --- These are used internally, but feel free to use them
 --- if they suit your needs.
 ---
----@class lazyjui.Utils
+---@class lazyjui.Utils: lazyjui.Module
 ---
 --- Checks type and validity of the command.
 ---
@@ -396,6 +447,25 @@
 ---
 ---@field string_to_table fun(str: string): string[]
 ---
+--- Utility function that calls a specific level of vim.log
+---@field info fun(msg: MsgData|string): nil
+---
+--- Utility function that calls a specific level of vim.log
+---@field warn fun(msg: MsgData|string): nil
+---
+--- Utility function that calls a specific level of vim.log
+---@field err fun(msg: MsgData|string): nil
+---
+--- Utility function for notifying messages,
+---
+---@field notify fun(msg: MsgData|string, level: lazyjui.MsgLevel|nil ): nil
+---
+--- Utility function for 'deep printing' values.
+--- Uses `vim.print` + `vim.inspect` under the hood.
+---@field deep_print fun(msg: MsgData|table|string, objects?: any|nil): nil
+---
+---
+--
 -- local M = {}
 -- return M
 
@@ -405,7 +475,7 @@
 --- very much internal functionality,
 --- you're welcome to see how it works.
 ---
----@class lazyjui.Window
+---@class lazyjui.Window: lazyjui.Module
 ---
 --- The buffer ID of the floating window.
 ---
@@ -454,25 +524,31 @@
 ---
 ---@field autocmd_group_has_init boolean?
 ---
+--- WIP - Will handle buffer management with a slight
+--- performance boost.
+---
+---@private
+---@field hide_only fun(self: lazyjui.Window): nil
+---
 --- The primary functionality of the `lazyjui.Window` module.
 --- This is what's called by the `lazyjui.Actions.open` function.
 ---
----@field open_floating_window fun(config: lazyjui.Config): Int, Int
+---@field open_floating_window fun(self: lazyjui.Window, config: lazyjui.Config): Int, Int
 ---
 --- The close and cleanup of the floating window.
 --- This is what's called by the `lazyjui.Actions.close` function.
 ---
----@field close_floating_window fun(): nil
+---@field close_floating_window fun(self: lazyjui.Window): nil
 ---
 --- Function for handling _all_ related autocmd setup.
 ---
----@field autocmd_group_init fun(config: lazyjui.Config): nil
+---@field autocmd_group_init fun(self: lazyjui.Window, config: lazyjui.Config): nil
 ---
 ---
 --- Autocmd cleanup and deinitialization function.
 --- Ensures that the autocmd group is removed.
 ---
----@field autocmd_group_deinit fun(): nil
+---@field autocmd_group_deinit fun(self: lazyjui.Window): nil
 ---
 -- local M = {}
 -- return M
