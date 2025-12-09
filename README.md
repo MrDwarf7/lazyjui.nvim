@@ -37,7 +37,7 @@ leveraging the [jjui](https://github.com/idursun/jjui) TUI for functionality.
         require("lazyjui").open()
       end,
     },
-  }
+  },
   opts =  {
     -- Optionally: 
     winblend = 69, -- If you want some level of transparency
