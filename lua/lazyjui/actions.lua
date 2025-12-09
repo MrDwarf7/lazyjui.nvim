@@ -3,6 +3,7 @@ local M = {
 	__name = "Actions",
 	__debug = false,
 	Window = nil,
+	cmd = nil,
 }
 
 M.__index = M
@@ -26,26 +27,33 @@ local function on_exit(_, code, __)
 	M.Window:close_floating_window()
 end
 
-function M:execute(cmd)
+function M:execute()
+	assert(self.cmd, "No command set internally to execute")
+	assert(type(self.cmd) == "table", "Command must be a table of strings")
+
 	vim.schedule(function()
-		vim.fn.jobstart(cmd, {
+		vim.fn.jobstart(self.cmd, {
 			term = true,
 			on_exit = on_exit,
 		})
 	end)
-	vim.cmd("startinsert")
 end
 
 function M:open(utils, config)
-	if not utils.is_available(config.cmd) then
+	if (not M.cmd) and (not utils.is_available(config.cmd)) then
 		vim.notify("jjui executable not found. Please install jjui and ensure it's in your PATH.", vim.log.levels.ERROR)
 	end
 
 	-- We can do some form of caching later using the return values I reckon
+	M.cmd = config.cmd
 
 	---@diagnostic disable-next-line: unused-local
 	local win, buf = self.Window:open_floating_window(config)
-	self:execute(config.cmd)
+	assert(win, "Failed to open floating window")
+	assert(buf, "Failed to create buffer for floating window")
+
+	self:execute()
+	vim.cmd("startinsert")
 end
 
 function M.setup(window)

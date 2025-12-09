@@ -93,9 +93,8 @@ function M:autocmd_group_init(config)
 				if not vim.api.nvim_win_is_valid(self.window) then
 					return
 				end
-				local win_pos_config = window_pos(config)
 				-- local new_width, new_height, new_row, new_col, _, _ = window_pos(config)
-				vim.api.nvim_win_set_config(self.window, win_pos_config)
+				vim.api.nvim_win_set_config(self.window, window_pos(config))
 			end, 20)
 		end,
 	})
@@ -151,8 +150,11 @@ function M:open_floating_window(config)
 		return win_pos_config.win_id, win_pos_config.bufnr
 	end
 
-	-- local t = table.unpack(win_pos_config)
-	-- vim.print("T value on UNPACK" .. vim.inspect(t))
+	if self.buffer == nil or vim.fn.bufwinnr(self.buffer) == -1 then
+		self.buffer = vim.api.nvim_create_buf(false, true)
+	else
+		self.loaded = true
+	end
 
 	---@type vim.api.keyset.win_config
 	local new_window_opts = {
@@ -160,12 +162,6 @@ function M:open_floating_window(config)
 		relative = "editor",
 		table.unpack(win_pos_config),
 	}
-
-	if self.buffer == nil or vim.fn.bufwinnr(self.buffer) == -1 then
-		self.buffer = vim.api.nvim_create_buf(false, true)
-	else
-		self.loaded = true
-	end
 
 	self.window = vim.api.nvim_open_win(self.buffer, true, new_window_opts)
 	buffer_opts(config.winblend)

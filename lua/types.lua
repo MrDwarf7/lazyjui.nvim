@@ -235,6 +235,10 @@
 ---
 ---@field Window? lazyjui.Window
 ---
+--- The command that should be called by the plugin.
+--- Cached after first use via `lazyjui.Utils.is_available`.
+---@field cmd? string[]
+---
 --- The `lazyjui.Actions` layer for calling the internal
 --- `lazyjui.Window` methods.
 ---
@@ -251,7 +255,7 @@
 --- and **remember** -
 --- You're not being 'nagging'; you're helping software (and developers) improve!
 ---
----@field execute fun(self: lazyjui.Actions, cmd: string|table): nil
+---@field execute fun(self: lazyjui.Actions): nil
 ---
 --- The primary funciton you'll be calling from your keymap via
 ---
@@ -314,7 +318,7 @@
 ---
 --- `cmd = { "jjui", "-r", "all()" }`
 ---
----@field cmd? string|string[]
+---@field cmd? string[]
 ---
 --- The default height of the floating window.
 ---
@@ -459,6 +463,7 @@
 --- Utility function for 'deep printing' values.
 --- Uses `vim.print` + `vim.inspect` under the hood.
 ---@field deep_print fun(msg: MsgData|table|string, objects?: any|nil): nil
+---
 ---
 --
 -- local M = {}
