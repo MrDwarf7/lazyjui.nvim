@@ -42,8 +42,12 @@ leveraging the [jjui](https://github.com/idursun/jjui) TUI for functionality.
   ---@type lazyjui.Opts
   opts =  {
     -- Optionally:
-    border_chars = nil, -- You can use custom border characters if you want. Omit or set as nil to use default.
-    -- support for custom command pass-through
+    border_chars = {}, -- to remove the entire outer border (or nil)
+    -- or
+    -- Use custom set of border chars (must be 8 long)
+    -- border_chars = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
+
+    -- Support for custom command pass-through
     -- In this example, we use the revset `all()` command
     --
     -- Will default to just `jjui`

@@ -16,9 +16,6 @@ local default_config = {
 }
 
 ---@package
-M.__index = M
-
----@package
 M.__has_init = false
 
 function M.setup(opts)
@@ -30,7 +27,6 @@ function M.setup(opts)
 	end
 
 	return setmetatable(M, {
-		__index = M,
 		__has_init = true,
 	})
 end
@@ -40,6 +36,5 @@ return setmetatable(M, {
 	__call = function(_, ...)
 		return M.setup(...)
 	end,
-	__index = M.__index,
 	__has_init = M.__has_init,
 })
