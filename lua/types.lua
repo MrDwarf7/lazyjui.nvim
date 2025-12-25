@@ -18,6 +18,10 @@
 ---
 ---@class Int: number
 
+--- A Single character string.
+--- Can be any UTF-8 character. (ie: these are unicode/multi-byte safe).
+---@class Char: string
+
 ---
 --- A number with only integer values.
 --- This class states the number must be unsigned
@@ -301,7 +305,7 @@
 ---
 --- ` local border_chars = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }`
 ---
----@field border_chars? string[]
+---@field border_chars? Char[]
 ---
 --- The command that should be called by the plugin.
 --- This has many strict checks on it when coming in from
