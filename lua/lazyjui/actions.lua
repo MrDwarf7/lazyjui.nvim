@@ -6,10 +6,6 @@ local M = {
 	cmd = nil,
 }
 
-M.__index = M
-
--- M.Window = nil
-
 function M:close()
 	self.Window:close_floating_window()
 end
@@ -47,6 +43,12 @@ function M:open(utils, config)
 	-- We can do some form of caching later using the return values I reckon
 	self.cmd = config.cmd
 
+	-- sanity check mostly. If for some reason we haven't setup Actions with a Window struct, we need to init ourselves
+	if not self.Window then
+		require("lazyjui.actions").setup(require("lazyjui.window"))
+		setmetatable(self, M)
+	end
+
 	---@diagnostic disable-next-line: unused-local
 	local win, buf = self.Window:open_floating_window(config)
 	assert(win, "Failed to open floating window")
@@ -58,8 +60,10 @@ end
 
 function M.setup(window)
 	-- Initialize submodules
+	window = window or require("lazyjui.window")
 	if not M.Window then
-		M.Window = window or require("lazyjui.window")
+		M.Window = window
+		--window or require("lazyjui.window")
 		return M
 	end
 	return M

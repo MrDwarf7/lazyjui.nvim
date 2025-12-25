@@ -1,14 +1,13 @@
-local Window = require("lazyjui.window")
 ---@class lazyjui
 local M = {
 	__name = "lazyjui",
 	__debug = false,
 	__master_debug = false,
 	opts = {},
-	Window = Window,
+	Window = nil,
 	Config = require("lazyjui.config"),
 	Utils = nil,
-	Actions = require("lazyjui.actions")(Window),
+	Actions = nil,
 }
 
 M.__has_init = false
@@ -27,17 +26,20 @@ end
 ---@package
 ---@return nil
 function M:load_stack()
-	-- local load_stack = function()
 	if self.__has_init then
 		return
 	end
 
 	local Utils = require("lazyjui.utils")
 	local Health = require("lazyjui.health")
+	local Window = require("lazyjui.window")
+	local Actions = require("lazyjui.actions")(Window)
 
 	local modules = {
 		Utils,
 		Health,
+		Window,
+		Actions,
 	}
 
 	---@class module.MetaData
