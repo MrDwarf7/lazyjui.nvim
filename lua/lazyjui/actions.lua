@@ -40,12 +40,12 @@ function M:execute()
 end
 
 function M:open(utils, config)
-	if (not M.cmd) and (not utils.is_available(config.cmd)) then
+	if (not M.cmd and not self.cmd) and (not utils.is_available(config.cmd)) then
 		vim.notify("jjui executable not found. Please install jjui and ensure it's in your PATH.", vim.log.levels.ERROR)
 	end
 
 	-- We can do some form of caching later using the return values I reckon
-	M.cmd = config.cmd
+	self.cmd = config.cmd
 
 	---@diagnostic disable-next-line: unused-local
 	local win, buf = self.Window:open_floating_window(config)
