@@ -152,7 +152,6 @@ function M:autocmd_group_deinit()
 	end
 
 	self.autocmd_group_has_init = false
-	-- self.__index = {}
 
 	-- Clean up autocmd group
 	-- if self.autocmd_group then

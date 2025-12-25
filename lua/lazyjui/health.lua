@@ -33,7 +33,6 @@ end
 ---@type lazyjui.Health
 return setmetatable(M, {
 	---@package
-	__index = M,
 	__name = M.__name,
 	__debug = M.__debug,
 })

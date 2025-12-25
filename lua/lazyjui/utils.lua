@@ -122,6 +122,5 @@ return setmetatable(M, {
 		return M
 	end,
 	---@package
-	__index = M,
 	__debug = M.__debug,
 })
