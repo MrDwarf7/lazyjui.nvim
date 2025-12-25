@@ -38,14 +38,19 @@ leveraging the [jjui](https://github.com/idursun/jjui) TUI for functionality.
       end,
     },
   },
+  -- You can also simply pass `opts = true` or `opts = {}` and the default options will be used
+  ---@type lazyjui.Opts
   opts =  {
-    -- Optionally: 
-    winblend = 69, -- If you want some level of transparency
+    -- Optionally:
+    border_chars = nil, -- You can use custom border characters if you want. Omit or set as nil to use default.
     -- support for custom command pass-through
-    -- In this example, we use the revset `all()` command 
+    -- In this example, we use the revset `all()` command
     --
     -- Will default to just `jjui`
-    cmd = { "jjui", "-r", "all()" }, 
+    cmd = { "jjui", "-r", "all()" },
+    height = 0.8, -- default is 0.8,
+    width = 0.9, -- default is 0.9,
+    winblend = 0, -- default is 0 (fully opaque). Set to 100 for fully transparent (not recommended though).
   }
 }
 ```
@@ -124,9 +129,9 @@ which jjui
 ```
 
 ```bash
-# Follow the instructions on the official jjui repository 
+# Follow the instructions on the official jjui repository
 
-# If using Arch for instance: 
+# If using Arch for instance:
 paru -S jjui-bin # or yay
 ```
 
@@ -156,4 +161,3 @@ MIT License - see [LICENSE](LICENSE) for details.
 - **[plenary.nvim](https://github.com/nvim-lua/plenary.nvim)** - Window management and other utilities
 - **[jj](https://github.com/jj-vcs/jj)** - The new-fangled VCS system that's all the rage with the cool kids
 - **[jjui](https://github.com/idursun/jjui)** - A TUI tool for jj that makes it a _lil_ bit easier to understand what is going on
-
