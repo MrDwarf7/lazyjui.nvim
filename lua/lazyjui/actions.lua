@@ -6,10 +6,6 @@ local M = {
 	cmd = nil,
 }
 
-M.__index = M
-
--- M.Window = nil
-
 function M:close()
 	self.Window:close_floating_window()
 end
@@ -40,12 +36,18 @@ function M:execute()
 end
 
 function M:open(utils, config)
-	if (not M.cmd) and (not utils.is_available(config.cmd)) then
+	if (not M.cmd and not self.cmd) and (not utils.is_available(config.cmd)) then
 		vim.notify("jjui executable not found. Please install jjui and ensure it's in your PATH.", vim.log.levels.ERROR)
 	end
 
 	-- We can do some form of caching later using the return values I reckon
-	M.cmd = config.cmd
+	self.cmd = config.cmd
+
+	-- sanity check mostly. If for some reason we haven't setup Actions with a Window struct, we need to init ourselves
+	if not self.Window then
+		require("lazyjui.actions").setup(require("lazyjui.window"))
+		setmetatable(self, M)
+	end
 
 	---@diagnostic disable-next-line: unused-local
 	local win, buf = self.Window:open_floating_window(config)
@@ -58,8 +60,10 @@ end
 
 function M.setup(window)
 	-- Initialize submodules
+	window = window or require("lazyjui.window")
 	if not M.Window then
-		M.Window = window or require("lazyjui.window")
+		M.Window = window
+		--window or require("lazyjui.window")
 		return M
 	end
 	return M

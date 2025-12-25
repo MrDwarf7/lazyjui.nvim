@@ -90,7 +90,7 @@
 ---
 --- height = 0.8
 ---
----@field height? Int|nil
+---@field height? Float|nil
 ---
 ---
 --- [Experiemntal]
