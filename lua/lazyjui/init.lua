@@ -1,13 +1,15 @@
+local window = require("lazyjui.window")
+
 ---@class lazyjui
 local M = {
 	__name = "lazyjui",
 	__debug = false,
 	__master_debug = false,
 	opts = {},
-	Window = nil,
+	Window = require("lazyjui.window"),
 	Config = require("lazyjui.config"),
 	Utils = nil,
-	Actions = nil,
+	Actions = require("lazyjui.actions")(window),
 }
 
 M.__has_init = false
@@ -32,14 +34,10 @@ function M:load_stack()
 
 	local Utils = require("lazyjui.utils")
 	local Health = require("lazyjui.health")
-	local Window = require("lazyjui.window")
-	local Actions = require("lazyjui.actions")(Window)
 
 	local modules = {
 		Utils,
 		Health,
-		Window,
-		Actions,
 	}
 
 	---@class module.MetaData
@@ -107,6 +105,7 @@ function M:load_stack()
 
 		debug_dump({ __name = module.__name, _debug = module.__debug })
 	end
+	setmetatable(M, self)
 end
 
 function M.setup(opts)

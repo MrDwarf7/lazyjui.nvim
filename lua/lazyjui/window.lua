@@ -213,11 +213,13 @@ function M:autocmd_group_init(config)
 	-- Autocmd to resize window on VimResized event
 	vim.api.nvim_create_autocmd("VimResized", {
 		group = self.autocmd_group,
+		buffer = self.buffer,
 		callback = function()
+			assert(self.window, "AU=VimResized :: self.window is empty!")
 			if not vim.api.nvim_win_is_valid(self.window) then
 				return
 			end
-			vim.api.nvim_win_set_config(self.window, window_pos(config))
+			handle_resize(config, self.window)
 		end,
 	})
 	setmetatable(M, self)
@@ -277,6 +279,7 @@ function M:open_floating_window(config)
 	if win_pos_config.win_id and win_pos_config.bufnr then
 		vim.wo.winblend = config.winblend
 		self = self:state_update(true, win_pos_config.bufnr, win_pos_config.win_id, prev_win)
+
 		self:autocmd_group_init(config)
 		-- buffer_opts(config.winblend)
 		return win_pos_config.win_id, win_pos_config.bufnr
