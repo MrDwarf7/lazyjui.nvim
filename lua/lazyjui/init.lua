@@ -1,15 +1,13 @@
-local window = require("lazyjui.window")
-
 ---@class lazyjui
 local M = {
 	__name = "lazyjui",
 	__debug = false,
 	__master_debug = false,
 	opts = {},
-	Window = require("lazyjui.window"),
+	Window = nil,
 	Config = require("lazyjui.config"),
 	Utils = nil,
-	Actions = require("lazyjui.actions")(window),
+	Actions = nil,
 }
 
 M.__has_init = false
@@ -34,10 +32,14 @@ function M:load_stack()
 
 	local Utils = require("lazyjui.utils")
 	local Health = require("lazyjui.health")
+	local Window = require("lazyjui.window")
+	local Actions = require("lazyjui.actions")(Window)
 
 	local modules = {
 		Utils,
 		Health,
+		Window,
+		Actions,
 	}
 
 	---@class module.MetaData
@@ -109,15 +111,26 @@ function M:load_stack()
 end
 
 function M.setup(opts)
-	M.opts = vim.tbl_deep_extend("force", M.opts, opts or {})
+	if M.__has_init then
+		M.Utils.notify("lazyjui is already initialized!", "warn")
+		return setmetatable(M, M)
+	end
+	collectgarbage("collect") -- run a full GC before setup
 
-	-- from M.Config: Fn(...) -> M.Config: attribute via the already assigned M.Config.__call->setup fn
-	M.Config = M.Config(M.opts)
+	local gc_pause_val = collectgarbage("setpause", 500)
+
+	-- from M.Config: Fn(...) -> M.Config: attribute via the already assigned M.Config.__call -> setup fn
+	M.Config = vim.deepcopy(M.Config(opts), true)
+	M.opts = vim.deepcopy(M.Config, true)
+
 	M:load_stack()
 	M.__has_init = true
 
-	-- Create user command
-	vim.api.nvim_create_user_command("LazyJui", M.open, {})
+	vim.api.nvim_create_user_command("LazyJui", M.open, {}) -- Create user command
+
+	collectgarbage("setpause", gc_pause_val) -- we reset it back to previous value
+	collectgarbage("collect") -- run a full GC before setup
+
 	---@return lazyjui
 	return setmetatable(M, M)
 end
