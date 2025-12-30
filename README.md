@@ -13,7 +13,7 @@ leveraging the [jjui](https://github.com/idursun/jjui) TUI for functionality.
 
 ## Prerequisites
 
-- **Neovim** 0.7.0
+- **Neovim** >=0.7.0
 - **[plenary.nvim](https://github.com/nvim-lua/plenary.nvim)** - Required dependency
 - **[jj](https://github.com/jj-vcs/jj)** - The VCS used with the plugin
 - **[jjui](https://github.com/idursun/jjui)** - The TUI/tool that's spawned inside the floating window
@@ -41,20 +41,34 @@ leveraging the [jjui](https://github.com/idursun/jjui) TUI for functionality.
   -- You can also simply pass `opts = true` or `opts = {}` and the default options will be used
   ---@type lazyjui.Opts
   opts =  {
-    -- Optionally:
-    border_chars = {}, -- to remove the entire outer border (or nil)
-    -- or
-    -- Use custom set of border chars (must be 8 long)
-    -- border_chars = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
+    -- Optionally (default):
+    border = {
+      chars = { "", "", "", "", "", "", "", "" }, -- either set all to empty to remove the entire outer border (or nil/{})
+      -- Use custom set of border chars (must be 8 long)
+      -- border_chars = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
+      thickness = 0, -- This handles the border of the 'outer' window it's nested inside, generally this is invisible
+      winhl_str = "", -- previous option was: "FloatBorder:LazyJuiBorder,NormalFloat:LazyJuiFloat", -- up to you how to set
+    },
+
+    -- The below options will now produce a warning advising to use the above syntax instead.
+    -- they'll work for a while; but note that the internal mapping will be removed in the future.
+    ---@deprecated use 'opts.border.chars' instead
+    -- border_chars = {},
+    ---@deprecated use 'opts.border.thickness' instead
+    -- border_thickness = 2,
+    ---@deprecated use 'opts.border.winl_str' instead
+    -- border_winhl_str = "FloatBorder:LazyJuiBorder,NormalFloat:LazyJuiFloat",
 
     -- Support for custom command pass-through
     -- In this example, we use the revset `all()` command
     --
     -- Will default to just `jjui`
-    cmd = { "jjui", "-r", "all()" },
+    cmd = { "jjui" },
     height = 0.8, -- default is 0.8,
     width = 0.9, -- default is 0.9,
     winblend = 0, -- default is 0 (fully opaque). Set to 100 for fully transparent (not recommended though).
+    -- hide_only = false, -- This is **experimental** and is subject to changing, currently not available
+    use_default_keymaps = true, -- setting this to false will result in no default mappings at all
   }
 }
 ```
