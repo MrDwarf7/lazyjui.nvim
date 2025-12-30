@@ -58,18 +58,10 @@
 --- in by the user to the `lazyjui.setup` function,
 --- or (if using lazyvim) the `opts` table in the plugin spec.
 ---
----@class lazyjui.Opts: lazyjui.Module
+---@class lazyjui.Opts: lazyjui.Module, lazyjui.Config.Border
 ---
---- Provide an array of characters to use for the border.
 ---
---- Ensure the order in which you're providing them is correct,
---- there's no sorting being done under the hood.
----
---- **Default**
----
---- `{ "╭", "─", "╮", "│", "╯", "─", "╰", "│" }`
----
----@field border_chars? string[]|nil
+---@field border? lazyjui.Config.Border|nil
 ---
 --- The command that should be called by the plugin.
 --- This has many strict checks on it when coming in from
@@ -176,7 +168,11 @@
 --- ```lua
 --- ---@type lazyjui.Default
 --- local default_config = {
----     border_chars = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+---     border = {
+---      chars = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+---      thickness = 1,
+---      winhl_str = "FloatBorder:LazyJuiBorder,NormalFloat:LazyJuiFloat",
+---     },
 ---     cmd = { "jjui" },
 ---     height = 0.8,
 ---     hide_only = false,
@@ -288,14 +284,7 @@
 
 ------------------------------------------------------------
 
----
---- The primary config after merging the
---- defaults and the user provided options.
---- This is what the plugin uses internally
---- during runtime.
----
----@class lazyjui.Config: lazyjui.Module
----
+---@class lazyjui.Config.Border
 --- Provide an array of characters to use for the border.
 ---
 --- Ensure the order in which you're providing them is correct,
@@ -303,9 +292,77 @@
 ---
 --- **Default**
 ---
---- ` local border_chars = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }`
+--- ` local border.chars = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }`
 ---
----@field border_chars? Char[]
+---@field chars? Char[]
+---
+--- The thickness of the border around the floating window.
+---
+--- **Default**
+---
+--- `border_thickness = 0`
+---
+---@field thickness? Int
+---
+--- This directly maps to `vim.wo.winhl` for the border window.
+--- Changes here will directly affect the appearance
+---
+--- **Default**
+---
+--- `border_winhl_str = ""`
+---
+--- **Example**
+---
+--- `border_winhl_str = "FloatBorder:LazyJuiBorder,NormalFloat:LazyJuiFloat"`
+---
+---@field winhl_str? string
+
+---
+--- The primary config after merging the
+--- defaults and the user provided options.
+--- This is what the plugin uses internally
+--- during runtime.
+---
+---@class lazyjui.Config: lazyjui.Module
+-- ---
+-- --- Provide an array of characters to use for the border.
+-- ---
+-- --- Ensure the order in which you're providing them is correct,
+-- --- there's no sorting being done under the hood.
+-- ---
+-- --- **Default**
+-- ---
+-- --- ` local border_chars = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }`
+-- ---
+-- ---@field border_chars? Char[]
+-- ---
+-- --- The thickness of the border around the floating window.
+-- ---
+-- --- **Default**
+-- ---
+-- --- `border_thickness = 0`
+-- ---
+-- ---@field border_thickness? Int
+-- ---
+-- --- This directly maps to `vim.wo.winhl` for the border window.
+-- --- Changes here will directly affect the appearance
+-- ---
+-- --- **Default**
+-- ---
+-- --- `border_winhl_str = ""`
+-- ---
+-- --- **Example**
+-- ---
+-- --- `border_winhl_str = "FloatBorder:LazyJuiBorder,NormalFloat:LazyJuiFloat"`
+-- ---
+-- ---@field border_winhl_str? string
+---
+--- The border configuration table.
+---
+---@field border? lazyjui.Config.Border
+---
+---
+---
 ---
 --- The command that should be called by the plugin.
 --- This has many strict checks on it when coming in from
@@ -398,7 +455,7 @@
 -- return M
 ------------------------------------------------------------
 
----@class PlaneryPercentageRangeWindow
+---@class PlenaryPercentageRangeWindow
 ---@field bufnr Int
 ---@field win_id Int
 ---
@@ -406,12 +463,12 @@
 ---@field border_win_id Int
 
 ---@class lazyjui.Config.WindowPos: vim.api.keyset.win_config
----@field width? number|nil Percentage of screen width (0.0 - 1.0)
----@field height? number|nil Percentage of screen height (0.0 - 1.0)
----@field row? number|nil Row position of the window
----@field col? number|nil Column position of the window
----@field win_id? number|nil Plenary window ID
----@field bufnr? number|nil Plenary buffer number
+---@field width? Float|nil Percentage of screen width (0.0 - 1.0)
+---@field height? Float|nil Percentage of screen height (0.0 - 1.0)
+---@field row? Float|nil Row position of the window
+---@field col? Float|nil Column position of the window
+---@field win_id? Int|nil Plenary window ID
+---@field bufnr? Int|nil Plenary buffer number
 
 ------------------------------------------------------------
 

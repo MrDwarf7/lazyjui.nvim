@@ -32,7 +32,7 @@ function M:execute()
 			term = true,
 			on_exit = on_exit,
 		})
-	end)
+	end, vim.cmd("startinsert"))
 end
 
 function M:open(utils, config)
@@ -51,11 +51,10 @@ function M:open(utils, config)
 
 	---@diagnostic disable-next-line: unused-local
 	local win, buf = self.Window:open_floating_window(config)
-	assert(win, "Failed to open floating window")
-	assert(buf, "Failed to create buffer for floating window")
+	assert(win, "Actions :: open :: Failed to open floating window")
+	assert(buf, "Actions :: open :: Failed to create buffer for floating window")
 
 	self:execute()
-	vim.cmd("startinsert")
 end
 
 function M.setup(window)
@@ -63,7 +62,6 @@ function M.setup(window)
 	window = window or require("lazyjui.window")
 	if not M.Window then
 		M.Window = window
-		--window or require("lazyjui.window")
 		return M
 	end
 	return M

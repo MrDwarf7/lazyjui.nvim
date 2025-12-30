@@ -115,6 +115,62 @@ function M.deep_print(msg, objects)
 	vim.print(vim.inspect(msg))
 end
 
+function M.get_nested(tbl, path)
+	local val = tbl
+	for _, key in ipairs(path) do
+		val = val[key]
+		if val == nil then
+			return nil
+		end
+	end
+	return val
+end
+
+function M.set_nested(tbl, path, value)
+	local cur = tbl
+	for i = 1, #path - 1 do
+		local key = path[i]
+		cur[key] = cur[key] or {}
+		cur = cur[key]
+	end
+	cur[path[#path]] = value
+end
+
+---@param mut_opts lazyjui.Default|lazyjui.Opts|lazyjui.Config
+---@param deprecations table<string, string[]>
+---@param warned table<string, boolean>
+-- ---@return table
+function M.migrate_deprecated(mut_opts, deprecations, warned)
+	if not mut_opts or not next(mut_opts) then
+		return
+	end
+
+	for old_key, new_path in pairs(deprecations) do
+		if mut_opts[old_key] ~= nil then
+			if not warned[old_key] then
+				local new_str = table.concat(new_path, ".")
+				vim.notify(
+					("[lazyjui] Config option '%s' is deprecated. Please use 'opts.%s = ...' instead."):format(
+						old_key,
+						new_str
+					),
+					vim.log.levels.WARN,
+					{ title = "lazyjui - Deprecated Option" }
+				)
+				warned[old_key] = true
+			end
+
+			-- Only migrate if new nested value isn't already set (ie: prefer new)
+			if M.get_nested(mut_opts, new_path) == nil then
+				M.set_nested(mut_opts, new_path, mut_opts[old_key])
+			end
+
+			-- Clean up old root key so it isn't held in memory
+			mut_opts[old_key] = nil
+		end
+	end
+end
+
 -- return M
 ---@type lazyjui.Utils
 return setmetatable(M, {

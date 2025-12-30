@@ -107,18 +107,30 @@ function M:load_stack()
 
 		debug_dump({ __name = module.__name, _debug = module.__debug })
 	end
+	setmetatable(M, self)
 end
 
 function M.setup(opts)
-	M.opts = vim.tbl_deep_extend("force", M.opts, opts or {})
+	if M.__has_init then
+		M.Utils.notify("lazyjui is already initialized!", "warn")
+		return setmetatable(M, M)
+	end
+	collectgarbage("collect") -- run a full GC before setup
 
-	-- from M.Config: Fn(...) -> M.Config: attribute via the already assigned M.Config.__call->setup fn
-	M.Config = M.Config(M.opts)
+	local gc_pause_val = collectgarbage("setpause", 500)
+
+	-- from M.Config: Fn(...) -> M.Config: attribute via the already assigned M.Config.__call -> setup fn
+	M.Config = vim.deepcopy(M.Config(opts), true)
+	M.opts = vim.deepcopy(M.Config, true)
+
 	M:load_stack()
 	M.__has_init = true
 
-	-- Create user command
-	vim.api.nvim_create_user_command("LazyJui", M.open, {})
+	vim.api.nvim_create_user_command("LazyJui", M.open, {}) -- Create user command
+
+	collectgarbage("setpause", gc_pause_val) -- we reset it back to previous value
+	collectgarbage("collect") -- run a full GC before setup
+
 	---@return lazyjui
 	return setmetatable(M, M)
 end
