@@ -577,4 +577,63 @@
 -- return M
 --
 ------------------------------------------------------------
+
+--- The table returned by `lazyjui.Window :: set_content_win_opts`
+--- It's really only used to standardize the table we get back
+---
+---@class lazyjui.Window._ContentWinOpts
+---@field anchor? Int
+---@field relative string
+---@field style string
+---@field row? Int
+---@field col? Int
+---@field width? Int
+---@field height? Int
+---@field zindex? Int
+---@field noautocmd? boolean
+---@field focusable boolean
+---@field border? table<lazyjui.Config.Border>
+---
+---
 --
+-- local M = {}
+-- return M
+
+------------------------------------------------------------
+
+--- An inner table returned by
+---
+---@class lazyjui.Window._BorderWinOpts.BorderThickness
+---@field   top number
+---@field   right number
+---@field   bot number
+---@field   left number
+---
+---
+--
+-- local M = {}
+-- return M
+
+------------------------------------------------------------
+
+--- The table returned by `lazyjui.Window :: set_border_win_opts`
+---
+---@class lazyjui.Window._BorderWinOpts
+---@field	 highlight? string
+---@field	 border_thickness lazyjui.Window._BorderWinOpts.BorderThickness
+---@field	 topleft Char|table<Char?>
+---@field	 top Char|table<Char?>
+---@field	 topright Char|table<Char?>
+---@field	 left Char|table<Char?>
+---@field	 botright Char|table<Char?>
+---@field	 bot Char|table<Char?>
+---@field	 botleft Char|table<Char?>
+---@field	 right Char|table<Char?>
+---@field	 focusable boolean
+---
+---
+--
+-- local M = {}
+-- return M
+
+------------------------------------------------------------
