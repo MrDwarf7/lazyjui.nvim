@@ -48,8 +48,10 @@ local function buffer_opts(winblend, winhl_str)
 
 	-- before the nvim_set_hl calls
 	vim.wo.winhl = winhl_str or nil -- "FloatBorder:LazyJuiBorder,NormalFloat:LazyJuiFloat"
-	vim.api.nvim_set_hl(0, "LazyJui", { link = "Normal", default = true })
-	vim.api.nvim_set_hl(0, "LazyJuiFloat", { link = "Normal", default = true })
+	local ns_id = vim.api.nvim_create_namespace("lazyjui")
+	vim.api.nvim_set_hl(ns_id, "lazyjui", { link = "Normal", default = true })
+	vim.api.nvim_set_hl(ns_id, "lazyjui_float", { link = "Normal", default = true })
+	vim.api.nvim_win_set_hl_ns(vim.api.nvim_get_current_win(), ns_id)
 
 	vim.wo.winblend = winblend or 0 -- apply user opacity
 end
@@ -92,7 +94,7 @@ end
 
 ---@param width number Example: 0.9 for 90% of screen width
 ---@param height number Example: 0.8 for 80% of screen height
----@return table Example: vim.api.nvim_open_win options table
+---@return lazyjui.Window._ContentWinOpts Example: vim.api.nvim_open_win options table
 local function set_content_win_opts(width, height)
 	return {
 		anchor = nil,
@@ -111,9 +113,10 @@ end
 
 ---@param config_border_chars Char[]|table<Char|nil> Example: { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
 ---@param border_thickness number|nil Example: 1
----@return table Example: vim.api.nvim_open_win options table
+---@return lazyjui.Window._BorderWinOpts Example: vim.api.nvim_open_win options table
 local function set_border_win_opts(config_border_chars, border_thickness)
 	local bchars = set_border_chars(config_border_chars)
+	---@type lazyjui.Window._BorderWinOpts
 	return {
 		highlight = nil,
 		border_thickness = {
