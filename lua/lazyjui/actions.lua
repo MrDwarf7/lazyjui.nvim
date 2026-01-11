@@ -53,6 +53,8 @@ function M:open(utils, config)
 	local win, buf = self.Window:open_floating_window(config)
 	assert(win, "Actions :: open :: Failed to open floating window")
 	assert(buf, "Actions :: open :: Failed to create buffer for floating window")
+	local ns_id = vim.api.nvim_get_namespaces()["lazyjui"] or vim.api.nvim_create_namespace("lazyjui")
+	assert(ns_id, "Actions :: open :: Failed to create/get namespace for lazyjui")
 
 	self:execute()
 end
