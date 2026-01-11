@@ -47,7 +47,9 @@ leveraging the [jjui](https://github.com/idursun/jjui) TUI for functionality.
       -- Use custom set of border chars (must be 8 long)
       -- border_chars = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
       thickness = 0, -- This handles the border of the 'outer' window it's nested inside, generally this is invisible
-      winhl_str = "", -- previous option was: "FloatBorder:LazyJuiBorder,NormalFloat:LazyJuiFloat", -- up to you how to set
+      -- See `:h nvim_win_set_hl_ns()` and associated docs for more details
+      -- previous option was: "FloatBorder:LazyJuiBorder,NormalFloat:LazyJuiFloat", -- up to you how to set
+      winhl_str = "",
     },
 
     -- The below options will now produce a warning advising to use the above syntax instead.
@@ -55,8 +57,8 @@ leveraging the [jjui](https://github.com/idursun/jjui) TUI for functionality.
     ---@deprecated use 'opts.border.chars' instead
     -- border_chars = {},
     ---@deprecated use 'opts.border.thickness' instead
-    -- border_thickness = 2,
-    ---@deprecated use 'opts.border.winl_str' instead
+    -- border_thickness = 0,
+    ---@deprecated use 'opts.border.winhl_str' instead
     -- border_winhl_str = "FloatBorder:LazyJuiBorder,NormalFloat:LazyJuiFloat",
 
     -- Support for custom command pass-through
