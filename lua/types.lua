@@ -58,7 +58,7 @@
 --- in by the user to the `lazyjui.setup` function,
 --- or (if using lazyvim) the `opts` table in the plugin spec.
 ---
----@class lazyjui.Opts: lazyjui.Module
+---@class lazyjui.Opts
 ---
 ---
 ---@field border? lazyjui.Config.Border|nil
