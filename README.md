@@ -1,4 +1,4 @@
-# LazyJui.nvim
+# lazyjui.nvim
 
 A Neovim plugin that provides a beautiful floating window interface for [jj](https://github.com/jj-vcs/jj),
 leveraging the [jjui](https://github.com/idursun/jjui) TUI for functionality.
