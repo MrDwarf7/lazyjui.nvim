@@ -1,0 +1,231 @@
+*lazyjui.txt*    lazyjui.nvim    Last change: 2025 June 01
+
+A Neovim plugin that provides a floating window interface for jj,
+leveraging the jjui TUI for functionality.
+
+==============================================================================
+CONTENTS                                                   *lazyjui-contents*
+
+    1. Introduction .......................... |lazyjui-introduction|
+    2. Requirements .......................... |lazyjui-requirements|
+    3. Installation .......................... |lazyjui-installation|
+    4. Configuration ......................... |lazyjui-configuration|
+    5. Usage ................................. |lazyjui-usage|
+    6. Commands .............................. |lazyjui-commands|
+    7. API ................................... |lazyjui-api|
+    8. Health Check .......................... |lazyjui-health|
+    9. Troubleshooting ....................... |lazyjui-troubleshooting|
+
+==============================================================================
+INTRODUCTION                                           *lazyjui-introduction*
+
+lazyjui.nvim creates a floating window and spawns the `jjui` TUI command
+inside it as a terminal job. This provides a seamless jj version control
+experience without leaving Neovim.
+
+Features:~
+- Floating window interface for jjui
+- Configurable window size, borders, and opacity
+- Auto-resize on Neovim resize
+- Auto-close on focus loss
+- Proper resource cleanup
+- Built-in health checks
+
+==============================================================================
+REQUIREMENTS                                           *lazyjui-requirements*
+
+- Neovim >= 0.7.0
+- plenary.nvim (https://github.com/nvim-lua/plenary.nvim)
+- jj (https://github.com/jj-vcs/jj)
+- jjui (https://github.com/idursun/jjui)
+
+==============================================================================
+INSTALLATION                                           *lazyjui-installation*
+
+Using lazy.nvim:~
+>lua
+    {
+      "mrdwarf7/lazyjui.nvim",
+      dependencies = {
+        "nvim-lua/plenary.nvim"
+      },
+      keys = {
+        {
+          "<Leader>gj",
+          function()
+            require("lazyjui").open()
+          end,
+        },
+      },
+      opts = {},
+    }
+<
+
+==============================================================================
+CONFIGURATION                                         *lazyjui-configuration*
+
+Call the setup function with an optional configuration table. If no options
+are provided, sensible defaults are used.
+
+>lua
+    require("lazyjui").setup({
+      border = {
+        chars = { "", "", "", "", "", "", "", "" },
+        thickness = 0,
+        winhl_str = "",
+      },
+      cmd = { "jjui" },
+      height = 0.8,
+      width = 0.9,
+      winblend = 0,
+      use_default_keymaps = true,
+    })
+<
+
+                                                       *lazyjui-config-border*
+border ~
+    A table controlling the floating window border.
+
+    border.chars (table):~
+        An array of 8 characters used for the border, in order:
+        top-left, top, top-right, right, bottom-right, bottom,
+        bottom-left, left.
+        Default: `{ "", "", "", "", "", "", "", "" }`
+
+    border.thickness (number):~
+        The thickness of the border around the floating window.
+        Default: `0`
+
+    border.winhl_str (string):~
+        The window highlight string for the border, directly maps to
+        |vim.wo.winhl|.
+        Default: `""`
+        Example: `"FloatBorder:LazyJuiBorder,NormalFloat:LazyJuiFloat"`
+
+                                                          *lazyjui-config-cmd*
+cmd ~
+    The command to execute inside the floating window. Must be provided
+    as a table. Allows passing jj flags.
+    Default: `{ "jjui" }`
+    Example: `{ "jjui", "-r", "all()" }`
+
+                                                       *lazyjui-config-height*
+height ~
+    The height of the floating window as a fraction of the screen height.
+    Value between 0.1 and 1.0.
+    Default: `0.8`
+
+                                                        *lazyjui-config-width*
+width ~
+    The width of the floating window as a fraction of the screen width.
+    Value between 0.1 and 1.0.
+    Default: `0.9`
+
+                                                     *lazyjui-config-winblend*
+winblend ~
+    The transparency of the floating window. `0` is fully opaque,
+    `100` is fully transparent.
+    Default: `0`
+
+                                          *lazyjui-config-use_default_keymaps*
+use_default_keymaps ~
+    Whether to register the default keymaps provided by the plugin.
+    Set to `false` to define your own keymaps.
+    Default: `true`
+
+                                                    *lazyjui-config-hide_only*
+hide_only ~
+    EXPERIMENTAL. Whether to hide the floating window instead of
+    destroying it. May provide slightly faster re-opening.
+    Default: `false`
+
+==============================================================================
+USAGE                                                         *lazyjui-usage*
+
+After installation and configuration, open the lazyjui interface using
+the |:LazyJui| command or the Lua API.
+
+Keymaps:~
+
+The recommended way to set up keymaps is through your plugin spec:
+>lua
+    keys = {
+      {
+        "<Leader>gj",
+        function()
+          require("lazyjui").open()
+        end,
+        desc = "Open LazyJui",
+      },
+    }
+<
+
+Or manually:
+>lua
+    vim.keymap.set("n", "<Leader>gj", function()
+      require("lazyjui").open()
+    end, { desc = "Open LazyJui" })
+<
+
+==============================================================================
+COMMANDS                                                   *lazyjui-commands*
+
+                                                                    *:LazyJui*
+:LazyJui
+    Open the lazyjui floating window interface. The `jjui` TUI will be
+    spawned inside the floating window.
+
+==============================================================================
+API                                                             *lazyjui-api*
+
+                                                            *lazyjui.setup()*
+lazyjui.setup({opts})
+    Initialize the plugin with the given options. This is called
+    automatically if using lazy.nvim with an `opts` table.
+
+    Parameters:~
+        {opts}  (table|nil)  Optional configuration table.
+                             See |lazyjui-configuration|.
+
+                                                             *lazyjui.open()*
+lazyjui.open()
+    Open the lazyjui floating window and spawn `jjui` inside it.
+
+                                                            *lazyjui.close()*
+lazyjui.close()
+    Close the lazyjui floating window and clean up resources.
+
+==============================================================================
+HEALTH CHECK                                                 *lazyjui-health*
+
+Run the built-in health check to verify your installation:
+>vim
+    :checkhealth lazyjui
+<
+
+The health check verifies:~
+- plenary.nvim is installed
+- `jjui` executable is found in PATH
+
+==============================================================================
+TROUBLESHOOTING                                       *lazyjui-troubleshooting*
+
+jjui executable not found~
+    Make sure you have the `jjui` command installed and available on
+    your PATH. Check with: >bash
+        which jjui
+<
+
+Window positioning issues~
+    Ensure plenary.nvim is installed. LazyJui uses plenary's advanced
+    window positioning when available and falls back to native Neovim
+    floating windows otherwise.
+
+Health check fails~
+    Run `:checkhealth lazyjui` to diagnose issues. Common problems:
+    - Missing plenary.nvim dependency
+    - jjui not in PATH
+    - Neovim version too old (requires >= 0.7.0)
+
+==============================================================================
+ vim:tw=78:ts=8:ft=help:norl:
