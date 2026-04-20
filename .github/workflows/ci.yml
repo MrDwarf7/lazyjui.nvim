@@ -1,14 +1,11 @@
 name: CI
-
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-
 permissions:
   contents: read
-
 jobs:
   lint:
     name: Lint
@@ -20,7 +17,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: latest
           args: --check lua/ tests/
-
   test:
     name: Test
     runs-on: ubuntu-latest

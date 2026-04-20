@@ -1,4 +1,21 @@
 {
     "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
-    "workspace.checkThirdParty": "Disable"
+    "workspace.checkThirdParty": false,
+    "runtime.path": [
+        "lua/?.lua",
+        "lua/?/types.lua",
+        "lua/?/init.lua"
+    ],
+    "runtime.path.pathStrict": true,
+    "workspace.library": [
+        "$VIMRUNTIME"
+    ],
+    "Lua.diagnostics.libraryFiles": "Disable",
+    "Lua.workspace.checkThirdParty": "Disable",
+    "diagnostics.globals": [
+        "vim",
+        "describe",
+        "it",
+        "P"
+    ]
 }

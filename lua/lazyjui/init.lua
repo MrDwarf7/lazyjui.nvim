@@ -63,10 +63,7 @@ function M:load_stack()
 			self.Utils.notify("Loaded module: " .. meta.__name, "info")
 			self.Utils.notify(
 				--
-				"Debug status for sub-module '"
-					.. meta.__name
-					.. "': "
-					.. tostring(meta.__debug),
+				"Debug status for sub-module '" .. meta.__name .. "': " .. tostring(meta.__debug),
 				"info"
 			)
 
