@@ -7,7 +7,7 @@ local M = {
 function M.check()
 	local health = vim.health or require("health")
 	-- Start health check
-	health.start("lazyju.nvim")
+	health.start("lazyjui.nvim")
 
 	-- Check for required plugins
 	if pcall(require, "plenary") then
